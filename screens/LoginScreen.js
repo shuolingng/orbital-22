@@ -1,9 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import {supabase} from '../database/Database';
-import { useForm } from "react-hook-form"
-import * as yup from 'yup';
-import { yupResolver } from "@hookform/resolvers/yup"
+import {supabase} from '../supabase-service';
 import {
   StyleSheet,
   Text,
@@ -15,10 +12,17 @@ import {
   Alert,
 } from "react-native";
 import { useEffect } from "react";
-import { useNavigation } from "@react-navigation/native"
+import { useNavigation } from "@react-navigation/native";
 
-export const loginSchema = yup.object().shape({
-  email:yup
+// React hook form
+import { yupResolver } from "@hookform/resolvers/yup";
+import * as yup from 'yup';
+import { useForm } from "react-hook-form";
+import { disableExpoCliLogging } from "expo/build/logs/Logs";
+
+
+const loginSchema = yup.object().shape({
+  email: yup
     .string()
     .email("Invalid Email Format")
     .required("Email Is A Required Field"),
@@ -35,6 +39,12 @@ export const ErrorText = ({ name, errors }) => {
   );
 };
 
+const ErrorAlert = ({ title, message}) =>
+  Alert.alert(title, message, [
+    { text: "OK", onPress: () => console.log("OK Pressed") },
+  ]);
+  
+
 export default function LoginScreen() {
   const {
     register, 
@@ -43,21 +53,35 @@ export default function LoginScreen() {
     handleSubmit, 
     // control, 
     // reset, 
-    formState: { errors }
+    formState: { errors },
   } = useForm({
     resolver: yupResolver(loginSchema),
     defaultValues: {
       email: "",
       password : "",
-    }});
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+    }
+  });
 
-  const useEffect = () => {
+  useEffect(() => {
     register("email");
     register("password");
+  },[])
+
+  async function doLogin(data) {
+    console.log(data);
+    const response = await supabase.auth.signIn(data);
+
+    if (response?.error) {
+      //render error
+      console.log(response?.error?.message);
+      ErrorAlert({
+        title: "Error logging in!", 
+        message: response?.error?.message,
+      })
+      return;
+    }
   }
-  
+  /*
   const pressLogin = () => {
     if (email.length <= 0 || password.length <= 0) {
       Alert.alert("Please check if you have registered and have filled up the required fields");
@@ -76,7 +100,7 @@ export default function LoginScreen() {
       navigation.navigate('GroceryList');
     }
   } 
-  console.log(errors)
+  */
 
   const navigation = useNavigation();
 
@@ -90,11 +114,12 @@ export default function LoginScreen() {
           id = "email"
           textContentType ="emailAddress"
           style={styles.TextInput}
+          autoCapitalize="none"
           placeholder="example@email.com"
           placeholderTextColor="#003f5c"
-          onChangeText={(email) => setValue("email", email)}
+          onChangeText={(text) => setValue("email", text)}
         />
-        <ErrorText name = "email" errors = {errors} />
+        <ErrorText name="email" errors={errors} />
       </View>
  
       <View style={styles.inputView}>
@@ -104,14 +129,15 @@ export default function LoginScreen() {
           style={styles.TextInput}
           placeholder="password"
           placeholderTextColor="#003f5c"
+          autoCapitalize="none"
           secureTextEntry={true}
-          onChangeText={(password) => setValue("password", password)}
+          onChangeText={(text) => setValue("password", text)}
         />
-        <ErrorText name = "password" errors = {errors} />
+        <ErrorText name="password" errors={errors} />
       </View>
 
       <Button
-        onPress = {() => navigation.navigate("GroceryList")}
+        onPress = {() => handleSubmit(doLogin)()}
         title = "Login" 
         color = "darkseagreen" />
 
