@@ -1,26 +1,10 @@
-import { StatusBar } from "expo-status-bar";
-import React, { useState } from "react";
-import { supabase } from '../supabase-service';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TextInput,
-  Button,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import { useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
-
-// React hook form
-import { yupResolver } from "@hookform/resolvers/yup";
+import React, { useState } from 'react';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, Button, Alert } from 'react-native';
+import { useForm } from "react-hook-form"
 import * as yup from 'yup';
-import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup"
 
-// URL polyfill for supabase
-import 'react-native-url-polyfill/auto';
+import { supabase } from '../database/Database';
 
 export const accountSchema = yup.object().shape({
   name: yup.string().required("Name Is A Required Field"),
@@ -41,133 +25,118 @@ export const ErrorMessage = ({name, errors}) => {
   );
 };
 
-export default function RegisterScreen() {
-  const {
-    register, 
-    setValue, 
-    getValues, 
-    handleSubmit, 
-    // control, 
-    // reset, 
-    formState: { errors }
-  } = useForm({
-    resolver: yupResolver(accountSchema),
-    defaultValues: {
-      name: "",
-      email: "",
-      password : "",
-    }
-  });
+export default function RegisterScreen({ navigation }) {
 
-  useEffect(() => {
-    register("name");
-    register("email");
-    register("password");
-  });
+    const {
+      register, 
+      setValue, 
+      getValues, 
+      handleSubmit, 
+      // control, 
+      // reset, 
+      formState: { errors }
+    } = useForm({
+      resolver: yupResolver(accountSchema),
+      defaultValues: {
+        name: "",
+        email: "",
+        password : "",
+      }
+    });
 
-  const ErrorAlert = ({title, message}) =>
-    Alert.alert(title, message, [
-      {text : "OK", onPress:() => console.log("OK Pressed")},
-    ]);
+    const useEffect = () => {
+      register("name");
+      register("email")
+      register("password");
+    };
+
+    const pressRegister = () =>
+    navigation.navigate('Login');
+
+    const ErrorAlert = ({title, message}) =>
+      Alert.alert(title, message, [
+        {text : "OK", onPress:() => console.log("OK Pressed")},
+      ]);
     
-  async function doCreateAccount(userData) {
-    console.log(userData);
-    const {email, password, name} = userData;
-    const response = await supabase.auth.signUp({ email,password});
+    async function doCreateAccount(userData) {
+      console.log(userData)
+      const {email,password} = userData;
+      const response = await supabase.auth.signUp({email, password});
+      const {data, error} = await supabase.from("users").insert([
+        {
+          userid: response.user?.id,
+          username: Text,
+          password: Text,
+        },
+      ]);
+      if (error) {
+        console.log(error?.message);
+        ErrorAlert({
+          title: "Error Creating User",
+          message: error?.message,
+        });
+        return;
+      }
+      }
 
-    if (response?.error) {
-      // render error
-      console.log(response?.error?.message);
-      ErrorAlert({
-        title: "Error creating an account",
-        message: response?.error?.message,
-      });
-      return;
-    }
-
-      // ADD USER PROFILE TO TABLE
-
-    const { data, error } = await supabase.from("users").insert([
-      {
-        user_id: response.user?.id,
-        household_id: response.user?.id,
-        username: email,
-        updated_at: new Date(),
-        name,
-      },
-    ]);
-
-    if (error) {
-      // render error
-      console.log(error?.message);
-      ErrorAlert({
-        title: "Error Creating User: Writing Profile Information",
-        message: error?.message,
-      });
-      return;
-    }
-  }
-
-  const navigation = useNavigation();    
+    
   
-  return (
-    <View style={styles.container}>
+    return (
+      <View style={styles.container}>
         
-      <View style = {styles.space} />
+        <View style = {styles.space} />
 
-      <View style={styles.inputView}>
-        <TextInput
+        <View style={styles.inputView}>
+          <TextInput
             style={styles.TextInput}
-            id = "name"
+            id = "Name"
             textContentType = "name"
             placeholder="Name"
             placeholderTextColor="#003f5c"
-            onChangeText={(text) => setValue("name", text)}
-        />
-        <ErrorMessage name="name" errors={errors} />
-      </View>
+            onChangeText={(name) => setValue("name", name)}
+          />
+          <ErrorMessage name = "name" errors = {errors} />
+        </View>
 
-      <View style={styles.inputView}>
-        <TextInput
+        <View style={styles.inputView}>
+          <TextInput
             id = "email"
             textContentType="email"
             style={styles.TextInput}
             placeholder="example@email.com"
             placeholderTextColor="#003f5c"
-            onChangeText={(text) => setValue("email", text)}
-        />
-        <ErrorMessage name="email" errors={errors} />
-      </View>
+            onChangeText={(email) => setValue("email",email)}
+          />
+          <ErrorMessage name = "email" errors = {errors} />
+        </View>
    
-      <View style={styles.inputView}>
-        <TextInput
-          id = "password"
-          textContentType="password"
-          style={styles.TextInput}
-          placeholder="Password"
-          placeholderTextColor="#003f5c"
-          secureTextEntry={true}
-          onChangeText={(text) => setValue("password", text)}
-        />
-        <ErrorMessage name="password" errors={errors} />
-      </View>
+        <View style={styles.inputView}>
+          <TextInput
+            id = "password"
+            textContentType="password"
+            style={styles.TextInput}
+            placeholder="Password"
+            placeholderTextColor="#003f5c"
+            secureTextEntry={true}
+            onChangeText={(password) => setValue("password", password)}
+          />
+          <ErrorMessage name = "password" errors = {errors} />
+        </View>
         
       
-      <TouchableOpacity
+        <TouchableOpacity
         style = {styles.registerBtn}
-        onPress = {handleSubmit(doCreateAccount)}>
-        <Text>REGISTER</Text>
-      </TouchableOpacity>
+        onPress = {() => {
+          handleSubmit(doCreateAccount);
+          pressRegister()}
+        }
+        >
+        <Text>Register</Text>
+        </TouchableOpacity>
 
-      <TouchableOpacity
-        style = {styles.registerBtn}
-        onPress = {() => navigation.navigate("Login")}>
-        <Text>CANCEL</Text>
-      </TouchableOpacity>
-
-    </View>
-  );
-}
+      </View>
+    );
+  }
    
   const styles = StyleSheet.create({
     container: {
