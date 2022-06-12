@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { supabase } from"./supabase-service";
 import { HomeScreenStack } from "./navigation/HomeStack";
 import { AuthScreenStack } from "./navigation/AuthStack";
+import 'react-native-gesture-handler'
 
 export default function App() {
   const [auth, setAuth] = useState(null);

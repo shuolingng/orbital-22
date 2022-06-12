@@ -90,7 +90,7 @@ export default function RegisterScreen() {
     const { data, error } = await supabase.from("users").insert([
       {
         user_id: response.user?.id,
-        household_id: 2,
+        household_id: response.user?.id,
         username: email,
         updated_at: new Date(),
         name,
