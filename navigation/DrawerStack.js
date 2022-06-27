@@ -13,7 +13,7 @@ export function DrawerScreenStack() {
         drawerContent = {(props) => <CustomDrawerContent {...props} />}
     >
       <DrawerStack.Screen name="Grocery List" component={GroceryScreen} />
-      <DrawerStack.Screen name="Recipe" component={RecipeScreen} />
+      <DrawerStack.Screen name="Recipes" component={RecipeScreen} />
     </DrawerStack.Navigator>
   );
 }
