@@ -24,4 +24,5 @@ export default function App() {
       {auth ? <HomeScreenStack /> : <AuthScreenStack />}
     </NavigationContainer>
   );
+
 }
