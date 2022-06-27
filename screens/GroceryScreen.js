@@ -36,7 +36,6 @@ export default function GroceryScreen() {
 
     return (
         <View style={styles.container}>
-            <Header />
             <View style = {styles.content}>
                 <AddFoodItem submitHandler = {submitHandler}/>
                 <View style = {styles.list}>

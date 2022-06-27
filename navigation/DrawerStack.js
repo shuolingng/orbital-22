@@ -3,6 +3,7 @@ import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from "
 import { View, Button } from 'react-native';
 import GroceryScreen from '../screens/GroceryScreen';
 import RecipeScreen from '../screens/RecipeScreen';
+import PantryScreen from '../screens/PantryScreen';
 import {supabase} from '../supabase-service';
 
 const DrawerStack = createDrawerNavigator();
@@ -13,7 +14,8 @@ export function DrawerScreenStack() {
         drawerContent = {(props) => <CustomDrawerContent {...props} />}
     >
       <DrawerStack.Screen name="Grocery List" component={GroceryScreen} />
-      <DrawerStack.Screen name="Recipe" component={RecipeScreen} />
+      <DrawerStack.Screen name="Pantry List" component={PantryScreen} />
+      <DrawerStack.Screen name="Recipes" component={RecipeScreen} />
     </DrawerStack.Navigator>
   );
 }
@@ -26,7 +28,7 @@ function CustomDrawerContent(props) {
                     <DrawerItemList {...props} />
                 </View>
             </DrawerContentScrollView> 
-            <View style = {{marginBottom : 30}}>
+            <View style = {{marginBottom:30, padding: 20}}>
                 <Button
                     title = "Log Out"
                     onPress = {async() => {
