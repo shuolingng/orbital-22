@@ -13,16 +13,6 @@ import {
 } from "react-native";
 import { TouchableOpacity } from "react-native";
 
-/*
-    height: '100%',
-    width: '90%',
-    backgroundColor: 'white',
-    borderRadius: 20,
-    marginTop: 10,
-    paddingLeft: 15,
-    alignContent: 'space-around'
-*/
-
 const RecipeScreen = () => {
 
   const API_ID = `463aef33`;
@@ -107,11 +97,12 @@ const styles = StyleSheet.create({
     height: 35,
   },
   inputField: {
-    marginBottom: 10,
-    paddingHorizontal: 8,
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ddd",
+    height: '100%',
+    width: '90%',
+    backgroundColor: '#eaeaea',
+    marginTop: 10,
+    paddingLeft: 15,
+    alignContent: 'space-around',
   },
 
   image: {
