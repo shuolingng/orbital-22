@@ -1,108 +1,34 @@
 import { StatusBar } from "expo-status-bar";
 import React, { useState } from "react";
-import {supabase} from '../supabase-service';
-import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TextInput,
-  Button,
-  TouchableOpacity,
-  Alert,
-} from "react-native";
-import { useEffect } from "react";
-import { useNavigation } from "@react-navigation/native";
-
-// React hook form
-import { yupResolver } from "@hookform/resolvers/yup";
-import * as yup from 'yup';
-import { useForm } from "react-hook-form";
-import { disableExpoCliLogging } from "expo/build/logs/Logs";
-
-
-const loginSchema = yup.object().shape({
-  email: yup
-    .string()
-    .email("Invalid Email Format")
-    .required("Email Is A Required Field"),
-  password: yup.string().required("Password Is A Required Field"),
-});
-
-export const ErrorText = ({ name, errors }) => {
-  return (
-    <View style = {{ paddingLeft: 8, color: "red" }}>
-      {errors[name] && (
-        <Text style = {{color: "red"}}>{errors?.[name]?.message}</Text>
-      )}
-    </View>
-  );
-};
-
-const ErrorAlert = ({ title, message}) =>
-  Alert.alert(title, message, [
-    { text: "OK", onPress: () => console.log("OK Pressed") },
-  ]);
-  
+import { supabase } from '../lib/supabase';
+import { StyleSheet, View, Image, Alert, TextInput, Button} from "react-native";
 
 export default function LoginScreen() {
-  const {
-    register, 
-    setValue, 
-    getValues, 
-    handleSubmit, 
-    // control, 
-    // reset, 
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(loginSchema),
-    defaultValues: {
-      email: "",
-      password : "",
-    }
-  });
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    register("email");
-    register("password");
-  },[])
+  async function signInWithEmail() {
+    setLoading(true)
+    const { user, error } = await supabase.auth.signIn({
+      email: email,
+      password: password,
+    })
 
-  async function doLogin(data) {
-    console.log(data);
-    const response = await supabase.auth.signIn(data);
-
-    if (response?.error) {
-      //render error
-      console.log(response?.error?.message);
-      ErrorAlert({
-        title: "Error logging in!", 
-        message: response?.error?.message,
-      })
-      return;
-    }
+    if (error) Alert.alert(error.message)
+    setLoading(false)
   }
-  /*
-  const pressLogin = () => {
-    if (email.length <= 0 || password.length <= 0) {
-      Alert.alert("Please check if you have registered and have filled up the required fields");
-      return; 
-    }
-    async function doLogin(data) {
-      console.log(data)
-      const response = await supabase.auth.signIn(data);
 
-      if (response?.error) {
-        console.log(response?.error?.message);
-        return;
-      }
-    }
-    if (handleSubmit(doLogin)) {
-      navigation.navigate('GroceryList');
-    }
-  } 
-  */
+  async function signUpWithEmail() {
+    setLoading(true)
+    const { user, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+    })
 
-  const navigation = useNavigation();
+    if (error) Alert.alert(error.message)
+    setLoading(false)
+  }
 
   return (
     <View style={styles.container}>
@@ -111,43 +37,38 @@ export default function LoginScreen() {
       <StatusBar style="auto" />
       <View style={styles.inputView}>
         <TextInput
-          id = "email"
-          textContentType ="emailAddress"
-          style={styles.TextInput}
-          autoCapitalize="none"
-          placeholder="example@email.com"
-          placeholderTextColor="#003f5c"
-          onChangeText={(text) => setValue("email", text)}
+          label="Email"
+          onChangeText={(text) => setEmail(text)}
+          value={email}
+          placeholder="email@address.com"
+          autoCapitalize={'none'}
         />
-        <ErrorText name="email" errors={errors} />
       </View>
  
       <View style={styles.inputView}>
         <TextInput
-          id = "password"
-          textContentType="password"
-          style={styles.TextInput}
-          placeholder="password"
-          placeholderTextColor="#003f5c"
-          autoCapitalize="none"
+          label="Password"
+          leftIcon={{ type: 'font-awesome', name: 'lock' }}
+          onChangeText={(text) => setPassword(text)}
+          value={password}
           secureTextEntry={true}
-          onChangeText={(text) => setValue("password", text)}
+          placeholder="Password"
+          autoCapitalize={'none'}
         />
-        <ErrorText name="password" errors={errors} />
       </View>
 
       <Button
-        onPress = {() => handleSubmit(doLogin)()}
-        title = "Login" 
+        onPress = {() => signInWithEmail()}
+        title = "Sign in"
+        disabled={loading} 
         color = "darkseagreen" />
 
       <View style ={styles.space} />
 
       <Button
-        onPress = {() => navigation.navigate("Register")}
-        title = "Register" 
-        color = "darkseagreen" />
-    
+        title="Sign Up"
+        disabled={loading}
+        onPress={() => signUpWithEmail()}/>
     </View>
   );
 }

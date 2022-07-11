@@ -7,7 +7,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 
-export default function PantryScreen({ route, navigation }) {
+export default function PantryScreen({ route, navigation}) {
     const [foodlist, setFoodlist] = useState([
         { text: 'apples', key:'1'},
         { text: 'eggs', key:'2'},
