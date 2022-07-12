@@ -1,28 +1,37 @@
+import 'react-native-url-polyfill/auto';
+import 'react-native-gesture-handler';
 import React, { useState, useEffect } from "react";
-import { NavigationContainer } from '@react-navigation/native';
-import { supabase } from"./supabase-service";
-import { HomeScreenStack } from "./navigation/HomeStack";
-import { AuthScreenStack } from "./navigation/AuthStack";
-import 'react-native-gesture-handler'
+import { supabase } from './lib/supabase';
+import AppNavigation from "./navigation/AppNavigator";
+import LoginScreen from './screens/LoginScreen';
+import { View, StyleSheet } from 'react-native';
+import { Session } from '@supabase/supabase-js';
 
 export default function App() {
-  const [auth, setAuth] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState(null)
 
   useEffect(() => {
-    setAuth(supabase.auth.session());
-    
-    supabase.auth.onAuthStateChange((_event, session) => {
-      console.log(session);
-      setAuth(session);
-    });
+    setSession(supabase.auth.session())
 
-  });
+    supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session)
+    })
+  }, [])
+
 
   return (
-    <NavigationContainer>
-      {auth ? <HomeScreenStack /> : <AuthScreenStack />}
-    </NavigationContainer>
+    <View style ={styles.container}>
+      {session && session.user ? (
+        <AppNavigation key={session.user.id} session={session} />
+      ) : (
+        <LoginScreen />
+      )}
+    </View>
   );
+};
 
-}
+const styles = StyleSheet.create({
+  container: {
+    flex:1,
+  },
+});

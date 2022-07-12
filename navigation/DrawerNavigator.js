@@ -1,10 +1,10 @@
 import React from "react";
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItemList } from "@react-navigation/drawer";
 import { View, Button } from 'react-native';
-import GroceryScreen from '../screens/GroceryScreen';
 import RecipeScreen from '../screens/RecipeScreen';
 import PantryScreen from '../screens/PantryScreen';
-import {supabase} from '../supabase-service';
+import ProfileScreen from '../screens/ProfileScreen';
+import {supabase} from '../lib/supabase';
 
 const DrawerStack = createDrawerNavigator();
 export function DrawerScreenStack() {
@@ -13,9 +13,9 @@ export function DrawerScreenStack() {
         initialRouteName="Home"
         drawerContent = {(props) => <CustomDrawerContent {...props} />}
     >
-      <DrawerStack.Screen name="Grocery List" component={GroceryScreen} />
       <DrawerStack.Screen name="Pantry List" component={PantryScreen} />
       <DrawerStack.Screen name="Recipes" component={RecipeScreen} />
+      <DrawerStack.Screen name="Profile" component={ProfileScreen} />
     </DrawerStack.Navigator>
   );
 }
