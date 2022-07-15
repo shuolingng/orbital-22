@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text,  TextInput, Button, View } from 'react-native';
 
-export default function AddFoodItem({ submitHandler }) {
+export default function AddFoodItem({ addFood }) {
     const [text, setText] = useState('');
 
     const changeHandler = (val) => {
@@ -15,7 +15,7 @@ export default function AddFoodItem({ submitHandler }) {
             placeholder = 'new food item...'
             onChangeText = {changeHandler}
             />
-            <Button onPress = {() => submitHandler(text)} title='add food item' color="darkseagreen" />
+            <Button onPress = {() => addFood(text)} title='add food item' color="darkseagreen" />
         </View>
     )
 }

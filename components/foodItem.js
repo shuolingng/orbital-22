@@ -4,8 +4,8 @@ import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 export default function FoodItem({ item, pressHandler }) {
 
     return (
-        <TouchableOpacity onPress = {() => pressHandler(item.key)}>
-            <Text style={styles.item}>{item.text}</Text>
+        <TouchableOpacity onPress = {() => pressHandler(item)}>
+            <Text style={styles.item}>{item.name}</Text>
         </TouchableOpacity>
     )
 

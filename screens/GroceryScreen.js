@@ -1,46 +1,104 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Alert } from 'react-native';
-import Header from '../components/header';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, TextInput, View, FlatList, Alert, Button } from 'react-native';
 import FoodItem from '../components/foodItem';
-import AddFoodItem from '../components/addFoodItem';
+import { supabase } from '../lib/supabase';
+import 'react-native-url-polyfill';
 
 export default function GroceryScreen() {
-    const [foodlist, setFoodlist] = useState([
-        { text: 'apples', key :'1'},
-        { text: 'eggs', key :'2'},
-        { text: 'bananas', key :'3'},
-        { text: 'rice', key :'4'},
-    ]);
+    const user = supabase.auth.user();
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [text, setText] = useState('');
 
-    const pressHandler = (key) => {
-        setFoodlist((prevFoodlist) => {
-            return prevFoodlist.filter(foodlist => foodlist.key != key);
-        });
+    useEffect(() => {
+        getGrocerylist();
+        return () => {
+            setData([]);
+        };
+    }, []);
+
+    async function getGrocerylist() {
+        try {
+            let { data: grocerylist, error } = await supabase
+                .from("grocerylist")
+                .select("name, food_id")
+                .eq("user_id", user.id);
+            
+            if (error) throw error;
+
+            setData([]);
+
+            grocerylist.map((grocery) => {
+                setData((prevGrocerylist) => {
+                    return [
+                        {
+                            food_id: grocery.food_id,
+                            name: grocery.name,
+                        },
+                        ...prevGrocerylist,
+                    ];
+                });
+            });
+        } catch (error) {
+            Alert.alert(error.message);
+        };
+    };
+
+    const addGrocery = async (foodname) => {
+        setLoading(true);
+        try {
+            let { data, error } = await supabase
+                .from("grocerylist")
+                .insert([
+                    { name: foodname, user_id: user.id }
+                ])
+                .single();
+            if (error) throw error;
+        } catch (error) {
+            Alert.alert(error.message);
+        } finally {
+            setLoading(false);
+        };
+    };
+
+    const deleteGrocery = async (item) => {
+        setLoading(true);
+        try {
+            let { data, error } = await supabase
+                .from("grocerylist")
+                .delete()
+                .match({ food_id: item.food_id });
+            
+            if (error) throw error;
+        } catch (error) {
+            Alert.alert(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const pressHandler = (item) => {
+        deleteGrocery(item);
+        getGrocerylist();
     }
 
     const submitHandler = (text) => {
-
-        if (text.length > 0) { 
-            setFoodlist((prevFoodlist) => {
-                return [
-                    { text: text, key: Math.random().toString() },
-                    ...prevFoodlist
-                ];
-            });
-        } else {
-            Alert.alert('oops!', 'please key in a food item!', [
-                {text: 'Understood', onPress: () => console.log('alert closed')}
-            ]);
-        }     
+        addGrocery(text);
+        getGrocerylist();  
     }
 
     return (
         <View style={styles.container}>
             <View style = {styles.content}>
-                <AddFoodItem submitHandler = {submitHandler}/>
+                <TextInput
+                style = {styles.input}
+                placeholder = 'new food item...'
+                onChangeText = {(text) => setText(text)}
+                />
+                <Button onPress = {() => submitHandler(text)} title='add food item' color="darkseagreen" />
                 <View style = {styles.list}>
                     <FlatList 
-                        data={foodlist}
+                        data={data}
                         renderItem = {({ item }) => (
                             <FoodItem item={item} pressHandler = {pressHandler} />
                         )}
@@ -65,5 +123,13 @@ const styles = StyleSheet.create({
 
     list: {
         marginTop: 20,
+    },
+
+    input: {
+        marginBottom: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
     }
 })
