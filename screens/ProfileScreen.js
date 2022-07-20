@@ -7,6 +7,7 @@ export default function ProfileScreen({ session }) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [household, setHousehold] = useState("");
+  const user = supabase.auth.user;
 
   useEffect(() => {
     if (session) getProfile();
@@ -69,10 +70,7 @@ export default function ProfileScreen({ session }) {
   }
 
   return (
-    <View>
-      <View style={[styles.verticallySpaced, styles.mt20]}>
-        <Input label="Email" value={session?.user?.email} disabled />
-      </View>
+    <View style ={styles.container}>
       <View style={styles.verticallySpaced}>
         <Input
           label="Name"
@@ -83,7 +81,7 @@ export default function ProfileScreen({ session }) {
       <View style={styles.verticallySpaced}>
         <Input
           label="Household"
-          value={household || ""}
+          value={household || user.id}
           onChangeText={(text) => setHousehold(text)}
         />
       </View>
@@ -93,11 +91,12 @@ export default function ProfileScreen({ session }) {
           title={loading ? "Loading ..." : "Update"}
           onPress={() => updateProfile({ name, household })}
           disabled={loading}
+          color="darkseagreen"
         />
       </View>
 
       <View style={styles.verticallySpaced}>
-        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} />
+        <Button title="Sign Out" onPress={() => supabase.auth.signOut()} color="darkseagreen" />
       </View>
     </View>
   );
@@ -105,8 +104,7 @@ export default function ProfileScreen({ session }) {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 40,
-    padding: 12,
+    padding: 40,
   },
   verticallySpaced: {
     paddingTop: 4,
@@ -116,4 +114,8 @@ const styles = StyleSheet.create({
   mt20: {
     marginTop: 20,
   },
+  buttons: {
+    marginTop: 15,
+    marginBottom: 15,
+  }
 });

@@ -68,7 +68,8 @@ export default function LoginScreen() {
       <Button
         title="Sign Up"
         disabled={loading}
-        onPress={() => signUpWithEmail()}/>
+        onPress={() => signUpWithEmail()}
+        color = "darkseagreen" />
     </View>
   );
 }

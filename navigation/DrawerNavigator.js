@@ -5,6 +5,7 @@ import RecipeScreen from '../screens/RecipeScreen';
 import PantryScreen from '../screens/PantryScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import GroceryScreen from "../screens/GroceryScreen";
+import AddPantryItemScreen from "../screens/AddPantryItemScreen";
 import {supabase} from '../lib/supabase';
 
 const DrawerStack = createDrawerNavigator();
@@ -18,6 +19,7 @@ export function DrawerScreenStack() {
       <DrawerStack.Screen name="Pantry List" component={PantryScreen} />
       <DrawerStack.Screen name="Recipes" component={RecipeScreen} />
       <DrawerStack.Screen name="Profile" component={ProfileScreen} />
+      <DrawerStack.Screen name="Test" component={AddPantryItemScreen} />
     </DrawerStack.Navigator>
   );
 }

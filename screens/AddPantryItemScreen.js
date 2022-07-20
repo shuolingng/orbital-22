@@ -1,13 +1,50 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, Button, Platform, TextInput } from 'react-native';
+import { StyleSheet, Text, View, Button, Platform, TextInput, Alert } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useNavigation } from '@react-navigation/native';
+import { supabase } from '../lib/supabase';
+import DropDownPicker from "react-native-dropdown-picker";
 
 export default function AddPantryItemScreen() {
+    const user = supabase.auth.user();
     const [date, setDate] = useState(new Date());
     const [food, setFood] = useState("");
+    const [category, setCategory] = useState(null);
+    const [items, setItems] = useState([
+        {label: "Fruits and Vegetables", value: "Fruits and Vegetables"},
+        {label: "Meats", value: "Meats"},
+        {label: "Dairy", value: "Dairy"},
+        {label: "Grains", value: "Grains"},
+        {label: "Other", value: "Other"},
+    ]);
+    const [open, setOpen] = useState(false);
     const [show, setShow] = useState(false);
+    const [loading, setLoading] = useState(false);
     const [dateText, setDateText] = useState('Click on the button to set an expiry date');
+
+    const navigation = useNavigation();
+
+    const addPantryItem = async (food, date, category) => {
+        setLoading(true);
+        try {
+            let { data, error } = await supabase
+                .from("pantrylist")
+                .insert([
+                    { expiry_date: date, name: food, user_id: user.id, category: category }
+                ])
+                .single();
+            if (error) throw error;
+        } catch (error) {
+            Alert.alert(error.message);
+        } finally {
+            setLoading(false);
+        };
+    };
+
+    const submitHandler = (food, date, category) => {
+        addPantryItem(food, date, category);
+        navigation.navigate("PantryList");
+    }
 
     const onChange = (event, selectedDate) => {
         const currentDate = selectedDate || date;
@@ -21,30 +58,33 @@ export default function AddPantryItemScreen() {
         console.log(fDate);
     }
 
-    const navigation = useNavigation();
-
-    const goToPantryList = () => {
-        navigation.navigate('PantryList', {
-            food, date
-        });
-    };
-
     return (
         <View style={styles.container}>
             <View style={styles.content}>
-                <Text> Enter the name of the food item and its expiry date </Text>
+                <Text>Enter the name of the food item, its expiry date, and food category </Text>
                 <TextInput
                 style = {styles.input}
                 placeholder = 'new food item...'
-                onChange = {(foodName) => setFood(foodName)}
+                onChangeText = {(text) => setFood(text)}
                 />
                 <Text> {dateText} </Text>
                 <View style={styles.expirybutton}>
                     <Button title="Change expiry date" onPress={() => setShow(true)} color="darkseagreen" />
                 </View>
 
+                <View>
+                    <DropDownPicker
+                        open={open}
+                        value={category}
+                        items={items}
+                        setOpen={setOpen}
+                        setValue={setCategory}
+                        setItems={setItems}
+                    />
+                </View>
+                
                 <View style={styles.expirybutton}>
-                    <Button title="Add food item" onPress={goToPantryList} color="darkseagreen" />
+                    <Button title="Add food item" onPress={() => submitHandler(food, date, category)} color="darkseagreen" />
                 </View>
             </View>
             
@@ -60,22 +100,6 @@ export default function AddPantryItemScreen() {
     );
 }
 
-/*  
-    const submitHandler = (food, date) => {
-        if (food.length > 0) { 
-            setFoodlist((prevFoodlist) => {
-                return [
-                    { text: food, key: Math.random().toString(), date: date },
-                    ...prevFoodlist
-                ];
-            });
-        } else {
-            Alert.alert('oops!', 'please key in a food item!', [
-                {text: 'Understood', onPress: () => console.log('alert closed')}
-            ]);
-        }     
-    }
-*/
 const styles = StyleSheet.create({
     container: {
         flex: 1,
