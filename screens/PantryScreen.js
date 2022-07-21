@@ -1,57 +1,88 @@
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, FlatList, Alert, Button } from 'react-native';
-import Header from '../components/header';
-import FoodItem from '../components/foodItem';
-import AddFoodItem from '../components/addFoodItem';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, TextInput, View, FlatList, Alert, Button } from 'react-native';
+import PantryItem from '../components/pantryItem';
+import { supabase } from '../lib/supabase';
+import 'react-native-url-polyfill';
+import { useNavigation } from '@react-navigation/native';
 
+export default function PantryScreen() {
+    const user = supabase.auth.user();
+    const [data, setData] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [foodname, setFoodname] = useState('');
+    const [expiryDate, setExpiryDate] = useState(new Date());
+    const [category, setCategory] = useState('');
 
-export default function PantryScreen({ route, navigation}) {
-    const [foodlist, setFoodlist] = useState([
-        { text: 'apples', key:'1'},
-        { text: 'eggs', key:'2'},
-        { text: 'bananas', key:'3'},
-        { text: 'rice', key:'4'},
-    ]);
+    const navigation = useNavigation();
 
-    const pressHandler = (key) => {
-        setFoodlist((prevFoodlist) => {
-            return prevFoodlist.filter(foodlist => foodlist.key != key);
-        });
-    }
+    useEffect(() => {
+        getPantrylist();
+        return () => {
+            setData([]);
+        };
+    }, []);
 
-    const submitHandler = (text) => {
+    async function getPantrylist() {
+        try {
+            let { data: pantrylist, error } = await supabase
+                .from("pantrylist")
+                .select("name, id, expiry_date, category")
+                .eq("user_id", user.id);
+            
+            if (error) throw error;
 
-        if (text.length > 0) { 
-            setFoodlist((prevFoodlist) => {
-                return [
-                    { text: text, key: Math.random().toString() },
-                    ...prevFoodlist
-                ];
+            setData([]);
+
+            pantrylist.map((pantry) => {
+                setData((prevPantrylist) => {
+                    return [
+                        {
+                            id: pantry.id,
+                            expiry_date: pantry.expiry_date,
+                            name: pantry.name,
+                            category: pantry.category
+                        },
+                        ...prevPantrylist,
+                    ];
+                });
             });
-        } else {
-            Alert.alert('oops!', 'please key in a food item!', [
-                {text: 'Understood', onPress: () => console.log('alert closed')}
-            ]);
-        }     
+        } catch (error) {
+            Alert.alert(error.message);
+        };
+    };
+
+    const deletePantry = async (item) => {
+        setLoading(true);
+        try {
+            let { data, error } = await supabase
+                .from("pantrylist")
+                .delete()
+                .match({ id: item.id });
+            
+            if (error) throw error;
+        } catch (error) {
+            Alert.alert(error.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const pressHandler = (item) => {
+        deletePantry(item);
+        getPantrylist();
     }
 
     return (
         <View style={styles.container}>
             <View style = {styles.content}>
-                <Button
-                onPress = {() => navigation.navigate("AddPantryItem")}
-                title = "Add new item" 
-                color = "darkseagreen" />
+                <Button onPress = {() => navigation.navigate("Add Pantry Item")} title='add food item' color="darkseagreen" />
                 <View style = {styles.list}>
-                    <FlatList 
-                        data={foodlist}
+                    <FlatList
+                        data={data}
                         renderItem = {({ item }) => (
-                            <FoodItem item={item} pressHandler = {pressHandler} />
+                            <PantryItem item={item} pressHandler={pressHandler} />
                         )}
                     />
-
                 </View>
             </View>
         </View>
@@ -71,5 +102,13 @@ const styles = StyleSheet.create({
 
     list: {
         marginTop: 20,
+    },
+
+    input: {
+        marginBottom: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 6,
+        borderBottomWidth: 1,
+        borderBottomColor: "#ddd",
     }
 })
