@@ -19,7 +19,6 @@ export function DrawerScreenStack() {
       <DrawerStack.Screen name="Pantry List" component={PantryScreen} />
       <DrawerStack.Screen name="Recipes" component={RecipeScreen} />
       <DrawerStack.Screen name="Profile" component={ProfileScreen} />
-      <DrawerStack.Screen name="Test" component={AddPantryItemScreen} />
     </DrawerStack.Navigator>
   );
 }

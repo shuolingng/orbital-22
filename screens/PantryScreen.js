@@ -3,7 +3,10 @@ import { StyleSheet, TextInput, View, FlatList, Alert, Button } from 'react-nati
 import PantryItem from '../components/pantryItem';
 import { supabase } from '../lib/supabase';
 import 'react-native-url-polyfill';
+import callGoogleVisionAsync from '../components/googleVision';
+import ImagePickerComponent from '../components/ImagePickerComponent';
 import { useNavigation } from '@react-navigation/native';
+
 
 export default function PantryScreen() {
     const user = supabase.auth.user();
@@ -75,7 +78,10 @@ export default function PantryScreen() {
     return (
         <View style={styles.container}>
             <View style = {styles.content}>
-                <Button onPress = {() => navigation.navigate("Add Pantry Item")} title='add food item' color="darkseagreen" />
+                <Button onPress = {() => navigation.navigate("Add Pantry Item")} title='add food item' color="darkseagreen" />    
+                <View style ={styles.space} />
+                <Button onPress = {() => navigation.navigate("Add Receipt Item")} title='scan your receipt' color="darkseagreen" />
+                <View style ={styles.space} />            
                 <View style = {styles.list}>
                     <FlatList
                         data={data}
@@ -110,5 +116,10 @@ const styles = StyleSheet.create({
         paddingVertical: 6,
         borderBottomWidth: 1,
         borderBottomColor: "#ddd",
-    }
+    },
+
+    space: {
+      width: 30, // or whatever size you need
+      height: 30,
+    },
 })

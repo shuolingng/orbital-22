@@ -4,6 +4,7 @@ import { DrawerScreenStack } from "./DrawerNavigator";
 import { NavigationContainer } from "@react-navigation/native";
 import PantryScreen from "../screens/PantryScreen";
 import AddPantryItemScreen from "../screens/AddPantryItemScreen";
+import AddReceiptItemScreen from "../screens/AddReceiptItemScreen";
 
 
 const HomeStack = createNativeStackNavigator();
@@ -22,6 +23,10 @@ export default AppNavigator = ({ session }) => {
                 <HomeStack.Screen
                 name="Add Pantry Item"
                 component={AddPantryItemScreen}
+                />
+                <HomeStack.Screen
+                name = "Add Receipt Item"
+                component={AddReceiptItemScreen}
                 />
             </HomeStack.Navigator>
         </NavigationContainer>
